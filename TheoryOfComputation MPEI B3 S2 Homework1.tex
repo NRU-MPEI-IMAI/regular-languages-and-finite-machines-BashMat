@@ -1,0 +1,350 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[pdf]{graphviz}
+%\usepackage[pdftex]{graphicx}
+%\usepackage{graphviz}
+%\usepackage{mathtools}
+
+\title{Теоретические модели вычислений \\ ДЗ №1: Регулярные языки и конечные автоматы}
+\author{Студент группы А-13а-19 Башлыков М.С.}
+\date{April 2022}
+
+\begin{document}
+
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+
+\section{Задание №1. Построить конечный автомат,
+распознающий язык}
+\begin{enumerate}
+    \item \(L = \{\omega \in \{a,b,c\}^* | |\omega|_c = 1 \} \) \\ \\
+        Так как нам нужен лишь один символ ``c``, то просто будем ждать прочтения этого символа. Если же нам встретится ещё один символ ``c``, покинем конечное состояние:
+    \begin{center}
+    %\begin{figure}
+    %\centering
+    %\def\svgwidth{\columnwidth}
+    %\input{DFA11.svg}
+    %\end{figure}
+    %\includegraphics[scale=0.4]{DFA11.svg}
+    \digraph[scale=1]{DFA11}{
+        rankdir = "LR";
+        q0 [shape=circle];
+        q1 [shape=doublecircle];
+        q2 [shape=circle];
+        q0 -> q0 [label = "a, b"];
+        q0 -> q1 [label = "c"];
+        q1 -> q1 [label = "a, b"];
+        q1 -> q2 [label = "c"];
+        q2 -> q2 [label = "a, b, c"];
+    }
+    \end{center}
+    
+    \item \(L = \{\omega \in \{a,b\}^* | |\omega|_a \leq 2, \; |\omega|_b \geq 2 \} \) \\ \\
+        Построим отдельно ДКА для \(L_1 = \{\omega \in \{a,b\}^* | |\omega|_a \leq 2 \} \) и для \(L_2 = \{\omega \in \{a,b\}^* | |\omega|_b \geq 2 \} \), а затем получим их прямое произведение: \\ \\
+        $L_1$: Будем менять состояние при чтении $a$, а при чтении $b$ переходить в то же самое состояние. При этом начальное состояние и состояния при первых двух чтениях $a$ будут конечными, а уже третье считывание приведёт к непринимающему состоянию.
+    \begin{center}
+    \digraph[scale=1]{DFA121}{
+        rankdir = "LR";
+        q0 [shape=doublecircle];
+        q1 [shape=doublecircle];
+        q2 [shape=doublecircle];
+        q3 [shape=circle];
+        q0 -> q0 [label = "b"];
+        q0 -> q1 [label = "a"];
+        q1 -> q1 [label = "b"];
+        q1 -> q2 [label = "a"];
+        q2 -> q2 [label = "b"];
+        q2 -> q3 [label = "a"];
+        q3 -> q3 [label = "a, b"];
+    }
+    \end{center}
+        $L_2$: Будем аналогично менять состояния при считывании символа $b$ и входить в то же самое состояние при считывании $a$. Однако здесь непринимающими будут состояния до считывания $b$ и после первого считывания символа $b$, второй же символ $b$ приведёт нас в конечное состояние.
+    \begin{center}
+    \digraph[scale=1]{DFA122}{
+        rankdir = "LR";
+        q4 [shape=circle];
+        q5 [shape=circle];
+        q6 [shape=doublecircle];
+        q4 -> q4 [label = "a"];
+        q4 -> q5 [label = "b"];
+        q5 -> q5 [label = "a"];
+        q5 -> q6 [label = "b"];
+        q6 -> q6 [label = "a, b"];
+    }
+    \end{center}
+        Тогда итоговый ДКА будет являться прямым произведением:
+    \begin{center}
+    \digraph[scale=0.5]{DFA12}{
+        rankdir = "LR";
+        q04 [shape=circle];
+        q05 [shape=circle];
+        q06 [shape=doublecircle];
+        q14 [shape=circle];
+        q15 [shape=circle];
+        q16 [shape=doublecircle];
+        q24 [shape=circle];
+        q25 [shape=circle];
+        q26 [shape=doublecircle];
+        q34 [shape=circle];
+        q35 [shape=circle];
+        q36 [shape=circle];
+        
+        q04 -> q14 [label = "a"];
+        q05 -> q15 [label = "a"];
+        q06 -> q16 [label = "a"];
+        q14 -> q24 [label = "a"];
+        q15 -> q25 [label = "a"];
+        q16 -> q26 [label = "a"];
+        q24 -> q34 [label = "a"];
+        q25 -> q35 [label = "a"];
+        q26 -> q36 [label = "a"];
+        q34 -> q34 [label = "a"];
+        q35 -> q35 [label = "a"];
+        
+        q04 -> q05 [label = "b"];
+        q05 -> q06 [label = "b"];
+        q06 -> q06 [label = "b"];
+        q14 -> q15 [label = "b"];
+        q15 -> q16 [label = "b"];
+        q16 -> q16 [label = "b"];
+        q24 -> q25 [label = "b"];
+        q25 -> q26 [label = "b"];
+        q26 -> q26 [label = "b"];
+        q34 -> q35 [label = "b"];
+        q35 -> q36 [label = "b"];
+        
+        q36 -> q36 [label = "a, b"];
+    }
+    \end{center}
+    
+    \item \(L = \{\omega \in \{a,b\}^*||\omega|_a \neq |\omega|_b \}\) \\
+        Это нерегулярный язык, а значит, для него нельзя построить ДКА. Докажем, применив лемму о разрастании:
+    \begin{enumerate}
+        \item Рассмотрим дополнение к языку: \(\neg L = \{\omega \in \{a,b\}^*||\omega|_a = |\omega|_b \}\).
+        \item Пусть \(\neg L\) – регулярный. Тогда выполняется лемма о разрастании.
+        \item Зафиксируем \(n \in N\). Пусть \(\omega = a^{n}b^{n}\). Тогда \(\omega \in \neg L\) и \(|\omega| \geq n\).
+        \item Рассмотрим всевозможные разбиения слова \(\omega = xyz\) такие, что \(|xy| \leq n\) и \(y \neq \lambda\):\\
+        \(x = a^{l}, 0 \leq l \leq n - 1\)\\
+        \(y = a^{m}, 1 \leq m \leq n - l\)\\
+        \(z = a^{n - l - m}b^{n}\)\\
+        Тогда при \(k = 2\) \(xy^{k}z \notin \neg L\), т.к. тогда \(xy^{k}z = xy^{2}z = a^{l + 2m + n - l - m}b^{n} = a^{n + m}b^{n}\) и \(n + m \neq m\), т.е. для слова \(xy^{k}z\) не выполяется условие \(|\omega|_a = |\omega|_b\). Следовательно, лемма о разрастании не выполняется.\\
+        Т.к. для дополнения языка не выполняется лемма о разрастании, то оно не является регулярным, следовательно, и изначальный язык не является регулярным.
+    \end{enumerate}
+        
+    
+    \item \(L = \{\omega \in \{a,b\}^* | \omega \omega = \omega \omega \omega \} \) \\
+        Исходя из определения этого языка, если $|\omega| = x$, то получается, что $2x = |\omega \omega| = |\omega \omega \omega| = 3x$, следовательно, $x = 0$, т.е. ДКА должен допускать лишь пустые слова:
+    \begin{center}
+    \digraph[scale=1]{DFA14}{
+        rankdir = "LR";
+        q0 [shape=doublecircle];
+        q1 [shape=circle];
+        q0 -> q1 [label = "a, b"];
+        q1 -> q1 [label = "a, b"];
+    }
+    \end{center}
+\end{enumerate}
+
+\section{Задание №2. Построить конечный автомат,
+используя прямое произведение}
+\begin{enumerate}
+    \item \(L_1 = \{\omega \in\{a,b\}^* | |\omega|_a \geq 2 \wedge |\omega|_b        \geq 2 \} \) \\
+        Построим ДКА отдельно для каждого условия, а затем возьмём их прямое произведение. \\
+        \(L_{11}= \{\omega \in\{a,b\}^* | |\omega|_a \geq 2 \} \):
+        \begin{center}
+            \digraph[scale=1]{DFA211}{
+                rankdir = "LR";
+                q0 [shape=circle];
+                q1 [shape=circle];
+                q2 [shape=doublecircle];
+                q0 -> q0 [label = "b"];
+                q0 -> q1 [label = "a"];
+                q1 -> q1 [label = "b"];
+                q1 -> q2 [label = "a"];
+                q2 -> q2 [label = "a, b"];
+            }
+        \end{center}
+        \(L_{12}= \{\omega \in\{a,b\}^* | |\omega|_b \geq 2 \} \):
+        \begin{center}
+            \digraph[scale=1]{DFA212}{
+                rankdir = "LR";
+                q3 [shape=circle];
+                q4 [shape=circle];
+                q5 [shape=doublecircle];
+                q3 -> q3 [label = "a"];
+                q3 -> q4 [label = "b"];
+                q4 -> q4 [label = "a"];
+                q4 -> q5 [label = "b"];
+                q5 -> q5 [label = "a, b"];
+            }
+        \end{center}
+        Прямое произведение:
+        \begin{center}
+            \digraph[scale=0.5]{DFA21}{
+                rankdir = "LR";
+                q03 [shape=circle];
+                q04 [shape=circle];
+                q05 [shape=circle];
+                q13 [shape=circle];
+                q14 [shape=circle];
+                q15 [shape=circle];
+                q23 [shape=circle];
+                q24 [shape=circle];
+                q25 [shape=doublecircle];
+                
+                q03 -> q13 [label = "a"];
+                q04 -> q14 [label = "a"];
+                q05 -> q15 [label = "a"];
+                q13 -> q23 [label = "a"];
+                q14 -> q24 [label = "a"];
+                q15 -> q25 [label = "a"];
+                q23 -> q23 [label = "a"];
+                q24 -> q24 [label = "a"];
+        
+                q03 -> q04 [label = "b"];
+                q04 -> q05 [label = "b"];
+                q05 -> q05 [label = "b"];
+                q13 -> q14 [label = "b"];
+                q14 -> q15 [label = "b"];
+                q15 -> q15 [label = "b"];
+                q23 -> q24 [label = "b"];
+                q24 -> q25 [label = "b"];
+                
+                q25 -> q25 [label = "a, b"];
+        
+            }
+        \end{center}
+        
+    \begin{center}
+    \end{center}
+    
+    \item \(L_2 = \{\omega \in\{a,b\}^* | |\omega|_a \geq 3 \wedge |\omega|_b
+        {нечётное} \} \) \\
+    \begin{center}
+    \end{center}
+    
+    \item \(L_3 = \{\omega \in\{a,b\}^* | |\omega|_a {чётно} \wedge |\omega|_b
+        {кратно трём} \} \) \\
+    \begin{center}
+    \end{center}
+    
+    \item \(L_4 = \neg L_3\) \\
+        ДКА может быть получен аналогично п. {1.3}, но затем нужно инвертировать состояния:
+    \begin{center}
+    \end{center}
+    
+    \item \(L_5 = L_2 \setminus L_3\) \\
+        Т.к. $A \setminus B = A \cap \neg B$, а $L_4 = \neg L_3$, то нам остаётся построить прямое произведение ДКА для $L_2$ и $L_4$
+    \begin{center}
+    \end{center}
+\end{enumerate}
+
+\section{Задание №3. Построить минимальный ДКА
+по регулярному выражению}
+\begin{enumerate}
+    \item \((ab + aba)^{*}a\) \\
+    
+    \begin{center}
+    \end{center}
+    
+    \item \(a(a(ab)^{*}b)^{*}(ab)^{*}\) \\
+    
+    \begin{center}
+    \end{center}
+    
+    \item \((a + (a + b)(a + b)b)^*\) \\
+    
+    \begin{center}
+    \end{center}
+    
+    \item \((b+c)((ab)^*c + (ba)^*)^*\) \\
+    
+    \begin{center}
+    \end{center}
+    
+    \item \((a+b)^+(aa + abab + bb + baba)(a+b)^+\) \\
+    
+    \begin{center}
+    \end{center}
+\end{enumerate}
+
+\section{Задание №4. Определить, является ли язык
+регулярным или нет}
+\begin{enumerate}
+    \item \(L = \{(aab)^{n}b(aba)^{m} | n \geq 0, \; m \geq 0\}\) \\
+        Язык является регулярным, т.к. можно построить ДКА, распознающий его:
+    \begin{center}
+    \digraph[scale=0.5]{DFA41}{
+        rankdir = "LR";
+        q0 [shape=circle];
+        q1 [shape=circle];
+        q2 [shape=circle];
+        q3 [shape=circle];
+        q4 [shape=doublecircle];
+        q5 [shape=circle];
+        q6 [shape=circle];
+        q0 -> q1 [label = "a"];
+        q0 -> q4 [label = "b"];
+        q1 -> q2 [label = "a"];
+        q2 -> q3 [label = "b"];
+        q3 -> q1 [label = "a"];
+        q3 -> q4 [label = "b"];
+        q4 -> q5 [label = "a"];
+        q5 -> q6 [label = "b"];
+        q6 -> q4 [label = "a"];
+    }
+    \end{center}
+    
+    \item \(L = \{uaav | u \in \{a, b\}^*, \; v \in \{a, b\}^*, \; |u|_b \geq         |v|_a\}\) \\
+        Язык не является регулярным. Докажем, применив лемму о разрастании:
+    \begin{enumerate}
+        \item Рассмотрим дополнение к языку: \(\neg L\).
+        \item Пусть \(\neg L\) – регулярный. Тогда выполняется лемма о разрастании.
+        \item Зафиксируем \(n \in N\). Пусть \(\omega = b^{2n}aaa^{2n + 1}\). Тогда \(\omega \in \neg L\) и \(|\omega| \geq n\).
+        \item Рассмотрим всевозможные разбиения слова \(\omega = xyz\) такие, что \(|xy| \leq n\) и \(y \neq \lambda\):\\
+        \(x = b^{l}, 0 \leq l \leq n - 1\)\\
+        \(y = b^{m}, 1 \leq m \leq n - l\)\\
+        \(z = b^{2n - l - m}aaa^{2n + 1}\)\\
+        Тогда при \(k = 2\) \(xy^{k}z \notin \neg L\), т.к. тогда \(xy^{k}z = xy^{2}z = b^{l + 2m + 2n - l - m}aaa^{2n + 1} = b^{2n + m}aaa^{2n + 1}\) и \(2n + m \geq 2n + 1\), т.е. для слова \(xy^{k}z\) выполяется условие \(|u|_b \geq |v|_a\}\) и \(xy^{k}z \in L\). Следовательно, лемма о разрастании не выполняется.\\
+        Т.к. для дополнения языка не выполняется лемма о разрастании, то оно не является регулярным, следовательно, и изначальный язык не является регулярным.
+    \end{enumerate}
+    
+    \item \(L = \{a^{m}w | w \in \{a, b\}^{*}, \; 1 \leq |w|_b \leq m\}\) \\
+        Язык не является регулярным. Докажем, применив лемму о разрастании:
+    \begin{enumerate}
+        \item Рассмотрим дополнение к языку: \(\neg L\).
+        \item Пусть \(\neg L\) – регулярный. Тогда выполняется лемма о разрастании.
+        \item Зафиксируем \(n \in N\). Пусть \(\omega' = a^{n}b^{n + 1}\). Тогда \(\omega' \in \neg L\) и \(|\omega'| \geq n\).
+        \item Рассмотрим всевозможные разбиения слова \(\omega' = xyz\) такие, что \(|xy| \leq n\) и \(y \neq \lambda\):\\
+        \(x = a^{l}, 0 \leq l \leq n - 1\)\\
+        \(y = a^{m}, 1 \leq m \leq n - l\)\\
+        \(z = a^{n - l - m}b^{n + 1}\)\\
+        Тогда при \(k = 2\) \(xy^{k}z \notin \neg L\), т.к. тогда \(xy^{k}z = xy^{2}z = a^{l + 2m + n - l - m}b^{n + 1} = a^{n + m}b^{n + 1}\) и \(n + m \geq n + 1\), т.е. для слова \(xy^{k}z\) выполяется условие: \(\omega' = a^{n + m}b^{n + 1} = a^{n + m}\omega\) и \(1 \leq |\omega|_b \leq n + m\), т.е. \(\omega' \in L\). Следовательно, лемма о разрастании не выполняется.\\
+        Т.к. для дополнения языка не выполняется лемма о разрастании, то оно не является регулярным, следовательно, и изначальный язык не является регулярным.
+    \end{enumerate}
+    
+    \item \(L = \{a^{k}b^{m}a^{n} | k = n \vee m > 0\}\) \\
+        Язык не является регулярным. Докажем, применив лемму о разрастании:
+    \begin{enumerate}
+        
+    \end{enumerate}
+    
+    \item \(L = \{ucv | u \in \{a, b\}^*, \; v \in \{a, b\}^*, \; u \neq v^R \}\) \\
+        Язык не является регулярным. Докажем, применив лемму о разрастании:
+    \begin{enumerate}
+        \item Рассмотрим дополнение к языку: \(\neg L\).
+        \item Пусть \(\neg L\) – регулярный. Тогда выполняется лемма о разрастании.
+        \item Зафиксируем \(n \in N\). Пусть \(\omega = a^{2n + 2}ca^{n + 1}\). Тогда \(\omega \in L\) и \(|\omega| \geq n\).
+        \item Рассмотрим всевозможные разбиения слова \(\omega = xyz\) такие, что \(|xy| \leq n\) и \(y \neq \lambda\):\\
+        \(x = a^{l}, 0 \leq l \leq n - 1\)\\
+        \(y = a^{m}, 1 \leq m \leq n - l\)\\
+        \(z = a^{2n + 2 - l - m}ca^{n + 1}\)\\
+        Тогда при \(k = 2\) \(xy^{k}z \notin \neg L\), т.к. тогда \(xy^{k}z = xy^{2}z = a^{l + 2m + 2n + 2 - l - m}ca^{n + 1} = a^{2n + 2 + m}ca^{n + 1}\) и \(1 \leq m \leq n\), т.е. \(1 \leq (2n + 2 + m) mod (n + 1) \leq n\). Следовательно, для слова \(xy^{k}z\) выполяется условие: \(\omega = ucv | u \in \{a, b\}^*, \; v \in \{a, b\}^*, \; u \neq v^R \}\), т.е. \(\omega' \in L\). Следовательно, лемма о разрастании не выполняется.\\
+        Т.к. для дополнения языка не выполняется лемма о разрастании, то оно не является регулярным, следовательно, и изначальный язык не является регулярным.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
